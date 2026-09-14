@@ -16,6 +16,14 @@ gem "turbo-rails"
 gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
+# Native Ruby support for the htmx JavaScript library [https://alchemists.io/projects/htmx]
+gem "htmx"
+
+# ActiveSupport 8.1 decodes messages with JSON.parse(source, options) — a
+# positional second argument that the json 3.x gem no longer accepts. Without
+# this pin every request carrying the encrypted session cookie dies while
+# decrypting it (which is to say: every form post in a browser).
+gem "json", "~> 2.21"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"

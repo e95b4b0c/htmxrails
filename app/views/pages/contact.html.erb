@@ -1,0 +1,44 @@
+<%= page_nav :contact, "Contact · HTMX on Rails" %>
+
+<section class="page-head">
+  <h1>Contact</h1>
+  <p class="lede">
+    A form that never leaves the page. The browser validates nothing
+    (<code>novalidate</code>) so you can watch Rails answer with
+    <code>422</code> and re-rendered errors, or with a success card.
+  </p>
+</section>
+
+<div class="grid grid-2">
+  <div>
+    <%= render "pages/contact_card", message: @message %>
+  </div>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>On the wire</h2>
+      <span class="tag">HX-*</span>
+    </header>
+    <ul class="notes">
+      <li>
+        <code>data-hx-post</code> + <code>data-hx-target="#contact-card"</code> +
+        <code>data-hx-swap="outerHTML"</code> — htmx submits the form and replaces
+        the card with whatever the server returns.
+        <code>data-hx-disabled-elt="find button"</code> disables the submit button
+        for the duration.
+      </li>
+      <li>
+        The CSRF token rides along in <code>data-hx-headers</code> on
+        <code>&lt;body&gt;</code>, inherited by every htmx request on the page.
+      </li>
+      <li>
+        A valid post answers with <code>HX-Trigger: contact:message-sent</code>;
+        <code>app/javascript/application.js</code> listens for that DOM event and
+        shows the toast in the corner.
+      </li>
+    </ul>
+
+    <%= code_sample :form %>
+    <%= code_sample :csrf %>
+  </section>
+</div>

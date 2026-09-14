@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Htmxrails" %></title>
+    <meta charset="utf-8">
+    <%# Swapped out-of-band by page_nav when htmx loads a fragment. %>
+    <title id="page-title"><%= content_for(:title) || "HTMX on Rails" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Htmxrails">
@@ -11,19 +13,35 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+
+    <%# htmx is served by Propshaft out of vendor/javascript (see config/importmap.rb
+        for the importmap, which stays free of htmx: a classic script keeps the
+        `window.htmx` global available for extensions, hx-on handlers and debugging). %>
+    <%= javascript_include_tag "htmx.min.js", defer: true %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
-  </body>
+  <%# hx-headers rides on <body> and is inherited by every element below, which
+      is how every htmx request carries the CSRF token. %>
+  <%= tag.body(**htmx_body_attributes, class: "app") do %>
+    <div class="shell">
+      <%= render "shared/header", current: @current_page %>
+
+      <%# The single region htmx ever swaps. %>
+      <main id="main-content" class="content">
+        <%= yield %>
+      </main>
+
+      <%= render "shared/footer" %>
+    </div>
+
+    <%# Filled by the contact:message-sent listener in application.js. %>
+    <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <% end %>
 </html>

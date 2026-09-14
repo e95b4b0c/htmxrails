@@ -9,6 +9,14 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Every action answers with either a full page (first visit, refresh, deep
+  # link) or a bare fragment (htmx swap) depending on the HX-Request header.
+  root "pages#home"
+
+  get "about", to: "pages#about", as: :about
+  get "contact", to: "pages#contact", as: :contact
+  post "contact", to: "pages#create_message"
+
+  # Polled by the clock widget on the home page.
+  get "clock", to: "pages#clock", as: :clock
 end

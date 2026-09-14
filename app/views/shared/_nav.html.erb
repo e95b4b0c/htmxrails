@@ -1,0 +1,25 @@
+<%#
+  Rendered in two places:
+
+  * by the layout, for a normal page request (oob: false)
+  * by `page_nav`, inside a page fragment, for htmx requests (oob: true)
+
+  In the second case the gem adds data-hx-swap-oob so htmx lifts the nav out of
+  the fragment and swaps it into the shell, keeping the active tab — and the
+  document title — in sync without re-sending the whole page.
+%>
+<% oob = local_assigns.fetch :oob, false %>
+<% title = local_assigns[:title] %>
+
+<% nav_attributes = { id: "site-nav", class: "nav", role: "tablist", "aria-label": "Demo pages" } %>
+<% nav_attributes.merge! HTMX[swap_oob: "outerHTML:#site-nav"] if oob %>
+
+<%= tag.nav(**nav_attributes) do %>
+  <%= nav_link "Home", root_path, current: current, page: :home %>
+  <%= nav_link "About", about_path, current: current, page: :about %>
+  <%= nav_link "Contact", contact_path, current: current, page: :contact %>
+<% end %>
+
+<% if oob && title.present? %>
+  <%= tag.title(title, id: "page-title", **HTMX[swap_oob: "outerHTML:#page-title"]) %>
+<% end %>

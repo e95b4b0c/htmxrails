@@ -1,0 +1,65 @@
+<%#
+  The swap target for POST /contact. Both the invalid response (422, errors
+  rendered here) and the valid one (the sent card) answer with this element.
+%>
+<%= tag.div(id: "contact-card", class: "card card-form") do %>
+  <header class="card-head">
+    <h2>Send a message</h2>
+    <span class="tag">POST /contact</span>
+  </header>
+
+  <%# form_with only forwards id/class/multipart/method/data/authenticity_token
+      from its keyword arguments, so the htmx attributes — and novalidate, which
+      keeps the browser out of the way so the server side errors are visible —
+      go in through html:. %>
+  <% form_attributes = { novalidate: true }.merge(
+       HTMX[post: contact_path,
+            target: "#contact-card",
+            swap: "outerHTML",
+            indicator: "#contact-indicator",
+            disabled_elt: "find button"] ) %>
+
+  <%= form_with model: message, url: contact_path, html: form_attributes do |form| %>
+    <% if message.errors.any? %>
+      <div class="errors" role="alert">
+        <p class="errors-title">
+          <%= pluralize message.errors.count, "problem" %> stopped this message:
+        </p>
+        <ul>
+          <% message.errors.full_messages.each do |text| %>
+            <li><%= text %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= form.label :name %>
+      <%= form.text_field :name, autocomplete: "name", placeholder: "Ada Lovelace" %>
+      <% message.errors[:name].each do |error| %>
+        <p class="field-error"><%= error %></p>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <%= form.label :email %>
+      <%= form.email_field :email, autocomplete: "email", placeholder: "ada@example.com" %>
+      <% message.errors[:email].each do |error| %>
+        <p class="field-error"><%= error %></p>
+      <% end %>
+    </div>
+
+    <div class="field">
+      <%= form.label :body, "Message" %>
+      <%= form.text_area :body, rows: 4, placeholder: "At least ten characters." %>
+      <% message.errors[:body].each do |error| %>
+        <p class="field-error"><%= error %></p>
+      <% end %>
+    </div>
+
+    <div class="form-actions">
+      <%= form.button "Send message", type: "submit" %>
+      <span id="contact-indicator" class="htmx-indicator muted">sending…</span>
+    </div>
+  <% end %>
+<% end %>

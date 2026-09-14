@@ -1,0 +1,28 @@
+<%# Replaces the form card after a valid POST /contact. %>
+<%= tag.div(id: "contact-card", class: "card card-success") do %>
+  <header class="card-head">
+    <h2>Thanks, <%= message.name %>.</h2>
+    <span class="tag tag-success">200 OK</span>
+  </header>
+
+  <p>
+    The server answered with this fragment and set
+    <code>HX-Trigger: contact:message-sent</code> — htmx turned that header into a
+    DOM event, which is what put the toast in the corner.
+  </p>
+
+  <dl class="receipt">
+    <dt>Name</dt>
+    <dd><%= message.name %></dd>
+    <dt>Email</dt>
+    <dd><%= message.email %></dd>
+    <dt>Message</dt>
+    <dd><%= message.body %></dd>
+  </dl>
+
+  <p class="muted">
+    Nothing was stored: this demo has no database table behind it.
+  </p>
+
+  <%= htmx_link "Send another", contact_path, class: "button button-ghost" %>
+<% end %>

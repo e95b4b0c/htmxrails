@@ -1,0 +1,93 @@
+<%= page_nav :about, "About · HTMX on Rails" %>
+
+<section class="page-head">
+  <h1>About this demo</h1>
+  <p class="lede">
+    A Rails <%= Rails.version %> app whose entire client side is
+    <%= link_to "htmx", "https://htmx.org", target: "_blank", rel: "noreferrer" %>
+    — no build step, no framework — plus the
+    <%= link_to "htmx gem", "https://alchemists.io/projects/htmx", target: "_blank", rel: "noreferrer" %>
+    (<code>htmx <%= htmx_gem_version %></code>) for the Ruby side.
+  </p>
+</section>
+
+<div class="grid grid-2">
+  <section class="card">
+    <header class="card-head">
+      <h2>The gem in three calls</h2>
+      <span class="tag">HTMX</span>
+    </header>
+    <p>
+      <code>HTMX[...]</code> builds attributes: snake_case keys, dashed and prefixed
+      on the way out. htmx accepts both <code>hx-</code> and <code>data-hx-</code>;
+      the gem defaults to <code>data-hx-</code>, which is valid HTML for any element.
+    </p>
+    <%= code_sample :nav %>
+
+    <p>
+      <code>HTMX.request</code> parses the <code>HX-*</code> request headers into a
+      Data object with <code>request?</code>, <code>boosted?</code> and
+      <code>history_restore_request?</code> predicates. This app uses
+      <code>request?</code> to decide between a full page and a fragment:
+    </p>
+    <%= code_sample :request %>
+
+    <p>
+      <code>HTMX.response!</code> writes the other direction. It maps the gem's names
+      onto the <code>HX-*</code> response headers:
+    </p>
+    <%= code_sample :response %>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>How the frame works</h2>
+      <span class="tag">routing</span>
+    </header>
+
+    <ol class="steps">
+      <li>
+        <strong>One shell.</strong> The layout renders the brand, the tabs and the
+        footer once, around <code>&lt;main id="main-content"&gt;</code>.
+      </li>
+      <li>
+        <strong>Tabs are htmx links.</strong> Each one asks for a URL with
+        <code>hx-get</code> and targets <code>#main-content</code>;
+        <code>hx-push-url</code> keeps the address bar honest, so every tab is also
+        a real, bookmarkable Rails route.
+      </li>
+      <li>
+        <strong>The layout is skipped for fragments.</strong> The controller returns
+        the same template with <code>layout false</code>, so a tab click transfers
+        a few kilobytes instead of the whole document.
+      </li>
+      <li>
+        <strong>The shell still updates.</strong> Because the nav lives outside the
+        swap target, the fragment ships it back with
+        <code>hx-swap-oob</code> — a second, smaller swap that moves the active tab
+        and rewrites the <code>&lt;title&gt;</code>.
+      </li>
+    </ol>
+
+    <%= code_sample :oob %>
+  </section>
+</div>
+
+<section class="card">
+  <header class="card-head">
+    <h2>Stack</h2>
+  </header>
+  <table class="table">
+    <tbody>
+      <tr><th>Rails</th><td><%= Rails.version %> (Propshaft, importmap, SQLite)</td></tr>
+      <tr><th>htmx (browser)</th><td>2.0.10, vendored in <code>vendor/javascript/htmx.min.js</code></td></tr>
+      <tr><th>htmx (Ruby)</th><td><code>htmx <%= htmx_gem_version %></code></td></tr>
+      <tr><th>Turbo</th><td>Installed but not loaded — Turbo Drive would highjack the same clicks</td></tr>
+      <tr><th>Database</th><td>None needed; the contact form is an <code>ActiveModel</code> object</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">
+    Tested at the HTTP layer: <code>test/controllers/pages_controller_test.rb</code>
+    asserts the shell, the fragments, the out-of-band swaps and both form outcomes.
+  </p>
+</section>

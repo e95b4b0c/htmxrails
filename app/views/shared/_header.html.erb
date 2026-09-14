@@ -1,0 +1,13 @@
+<header class="topbar">
+  <%= link_to root_path, **htmx_nav_attributes(root_path), class: "brand" do %>
+    <span class="brand-mark">hx</span>
+    <span class="brand-name">HTMX <em>on</em> Rails</span>
+  <% end %>
+
+  <%= render "shared/nav", current: current, oob: false %>
+
+  <div class="topbar-meta">
+    <span id="nav-indicator" class="htmx-indicator spinner" aria-hidden="true"></span>
+    <span class="badge">htmx gem <%= htmx_gem_version %></span>
+  </div>
+</header>

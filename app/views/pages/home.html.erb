@@ -1,0 +1,69 @@
+<%= page_nav :home, "Home · HTMX on Rails" %>
+
+<section class="hero">
+  <p class="eyebrow">Rails <%= Rails.version %> · htmx gem <%= htmx_gem_version %> · htmx 2</p>
+  <h1>One HTML shell. Every page is a fragment.</h1>
+  <p class="lede">
+    The header, the tabs and this frame were rendered by Rails once. Each tab below
+    asks the server for <strong>HTML</strong> and htmx swaps it into
+    <code>#main-content</code> — no JSON, no client-side router, no state in the browser.
+  </p>
+  <div class="hero-actions">
+    <%= htmx_link "About the gem", about_path, class: "button" %>
+    <%= htmx_link "Contact form demo", contact_path, class: "button button-ghost" %>
+  </div>
+</section>
+
+<div class="grid grid-2">
+  <section class="card">
+    <header class="card-head">
+      <h2>Server clock</h2>
+      <span class="tag">hx-trigger: every 2s</span>
+    </header>
+    <p>This fragment polls <code>/clock</code> every two seconds and replaces itself.</p>
+
+    <%= render "pages/clock" %>
+
+    <%= code_sample :clock %>
+  </section>
+
+  <section class="card">
+    <header class="card-head">
+      <h2>What the last tab click did</h2>
+      <span class="tag">the gem</span>
+    </header>
+    <p>The tab links in the shell are built by the htmx gem — one hash, correct attributes:</p>
+
+    <%= code_sample :nav %>
+
+    <p>Rails answers with the fragment only. No layout, no head, no nav:</p>
+
+    <%= code_sample :layout %>
+  </section>
+</div>
+
+<section class="card">
+  <header class="card-head">
+    <h2>Four things to try</h2>
+  </header>
+  <ol class="steps">
+    <li>
+      <strong>Click a tab.</strong> Watch the URL change and the active tab update —
+      the nav is refreshed out of band, the page is never reloaded.
+      Reload the browser afterwards: you get the full page from the same URL.
+    </li>
+    <li>
+      <strong>Submit the contact form</strong> with an empty field, then with a valid
+      one: a <code>422</code> renders the errors in place, a success response swaps the
+      card and fires a toast from the <code>HX-Trigger</code> header.
+    </li>
+    <li>
+      <strong>Watch the clock.</strong> Each tick is a fresh request — the request id
+      changes every two seconds.
+    </li>
+    <li>
+      <strong>Read the About page</strong> for the gem API: <code>HTMX[...]</code>,
+      <code>HTMX.request</code> and <code>HTMX.response!</code>.
+    </li>
+  </ol>
+</section>

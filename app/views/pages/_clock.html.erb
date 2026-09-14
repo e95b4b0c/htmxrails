@@ -1,0 +1,13 @@
+<%#
+  The polling fragment. It carries its own hx-get/hx-trigger/hx-swap attributes,
+  so the response replaces the element it came from and keeps polling.
+%>
+<%= tag.div(id: "clock",
+            class: "clock",
+            **HTMX[get: clock_path, trigger: "every 2s", swap: "outerHTML"]) do %>
+  <span class="clock-time"><%= Time.current.strftime("%H:%M:%S.%L") %></span>
+  <span class="clock-meta">
+    <span class="dot" aria-hidden="true"></span>
+    request <code><%= request.request_id[0, 8] %></code>
+  </span>
+<% end %>
