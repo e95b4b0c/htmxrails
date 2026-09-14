@@ -24,6 +24,19 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[data-hx-get=?]", contact_path
   end
 
+  # htmx arrives through the import map, imported by application.js, so the
+  # layout carries no script tag for it and there is no load order to reason about.
+  test "htmx is loaded through the import map, not a separate script tag" do
+    get root_url, headers: browser_headers
+
+    assert_response :success
+    assert_select "script[src*=htmx]", count: 0
+
+    importmap = JSON.parse(response.body[%r{<script type="importmap"[^>]*>(.*?)</script>}m, 1])
+    assert_match %r{\A/assets/htmx\.esm(-[0-9a-f]+)?\.js\z}, importmap["imports"]["htmx"]
+    assert_match %r{\A/assets/application(-[0-9a-f]+)?\.js\z}, importmap["imports"]["application"]
+  end
+
   test "a browser request for a subpage renders the full shell" do
     get about_url, headers: browser_headers
 

@@ -18,12 +18,10 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app %>
 
-    <%# htmx is served by Propshaft out of vendor/javascript (see config/importmap.rb
-        for the importmap, which stays free of htmx: a classic script keeps the
-        `window.htmx` global available for extensions, hx-on handlers and debugging). %>
-    <%= javascript_include_tag "htmx.min.js", defer: true %>
+    <%# The import map plus application.js, which imports htmx from
+        vendor/javascript/htmx.esm.js (see config/importmap.rb). %>
     <%= javascript_importmap_tags %>
   </head>
 

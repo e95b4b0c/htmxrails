@@ -80,9 +80,9 @@
   <table class="table">
     <tbody>
       <tr><th>Rails</th><td><%= Rails.version %> (Propshaft, importmap, SQLite)</td></tr>
-      <tr><th>htmx (browser)</th><td>2.0.10, vendored in <code>vendor/javascript/htmx.min.js</code></td></tr>
+      <tr><th>htmx (browser)</th><td>2.0.10, vendored in <code>vendor/javascript/htmx.esm.js</code> and imported by <code>application.js</code></td></tr>
       <tr><th>htmx (Ruby)</th><td><code>htmx <%= htmx_gem_version %></code></td></tr>
-      <tr><th>Turbo</th><td>Installed but not loaded — Turbo Drive would highjack the same clicks</td></tr>
+      <tr><th>Hotwire</th><td>Not installed — Turbo Drive and Stimulus would compete with htmx for the same clicks, forms and DOM</td></tr>
       <tr><th>Database</th><td>None needed; the contact form is an <code>ActiveModel</code> object</td></tr>
     </tbody>
   </table>

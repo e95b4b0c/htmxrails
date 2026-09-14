@@ -82,16 +82,53 @@ app/helpers/application_helper.rb        page_nav / nav_link / body 级 CSRF 头
 app/helpers/code_sample_helper.rb        页面上展示的代码片段
 app/views/pages/_clock.html.erb          每 2 秒自替换的轮询片段
 app/views/pages/_contact_card.html.erb   表单卡片(422 时原样返回,带错误)
-app/javascript/application.js            422 也交换 + HX-Trigger → toast
-vendor/javascript/htmx.min.js            htmx 2.0.10(Propshaft 直接服务)
-test/controllers/pages_controller_test.rb 请求层断言(片段、OOB、422、HX-Trigger)
+app/javascript/application.js            唯一的 JS 入口:import htmx、422 交换配置、HX-Trigger → toast
+config/importmap.rb                      把 "htmx" 映射到 vendor/javascript/htmx.esm.js
+vendor/javascript/htmx.esm.js            htmx 2.0.10 的 ESM 构建
+test/controllers/pages_controller_test.rb 请求层断言(片段、OOB、422、HX-Trigger、importmap)
 ```
+
+## 前端加载方式
+
+layout 里没有任何 htmx 的 `<script>` 标签,只有 `javascript_importmap_tags`:
+
+```erb
+<%= stylesheet_link_tag :app %>
+<%= javascript_importmap_tags %>
+```
+
+htmx 由 `app/javascript/application.js` 自己 import 进来:
+
+```js
+import htmx from "htmx"   // importmap 把裸标识符解析成 /assets/htmx.esm-<digest>.js
+window.htmx = htmx        // 让 hx-on 表达式、扩展和浏览器控制台都能拿到 htmx
+```
+
+好处是**没有加载顺序问题**:模块的依赖图保证 htmx 先于 `htmx.config` 那几行执行
+(之前用 `<script defer>` 依赖"经典 defer 脚本先于模块脚本执行"的约定)。
+`window.htmx = htmx` 是必要的:模块作用域里的 `htmx` 不是全局的,而 `hx-on`
+表达式是在全局里求值的。
+
+代价:htmx 的 ESM 构建(`dist/htmx.esm.js`,168 KB)只有**未压缩**版本,
+而经典构建的 `htmx.min.js` 是 51 KB(gzip 后差距小得多)。做演示时未压缩反而
+便于在 DevTools 里读源码、下断点;真要上线,换 `htmx.min.js` 或走打包器即可。
 
 ## 两个环境说明
 
-* **Turbo 没有加载。** `turbo-rails` 仍在 Gemfile 里(因为
-  `stale_when_importmap_changes` 由它提供),但 `app/javascript/application.js`
-  不再 import 它:Turbo Drive 会拦截同一批点击和表单提交,和 htmx 冲突。
+* **Hotwire 已移除。** `turbo-rails` 和 `stimulus-rails` 都从 Gemfile 删掉了:
+  importmap 里的 pin、`data-turbo-track`、以及 `app/javascript/controllers/`
+  (Stimulus 的 `application.js` / `index.js` / `hello_controller.js`,Rails 默认
+  模板,演示里从未用到)一并清掉。现在 `app/javascript/application.js` 是全应用
+  唯一的 JS 文件,只做三件事:import htmx、配置 422 也交换、监听 `HX-Trigger`
+  弹 toast。
+  删 Hotwire 是安全的:`ApplicationController` 里的
+  `stale_when_importmap_changes` 来自 `importmap-rails`
+  (`app/controllers/importmap/freshness.rb`),与 Turbo 无关。
+  唯一残留的是 `javascript_importmap_tags` 写死在 importmap `<script>` 上的
+  `data-turbo-track="reload"`(importmap-rails 自己的模板,没有配置项),
+  没有 Turbo 时无人读取,可以忽略。
+  保留 `importmap-rails` 本身:它不属于 Hotwire,是 Rails 8 默认的 JS 交付方式,
+  也是上面那行 `stale_when_importmap_changes` 的来源。
 * **`json` 固定在 2.x。** ActiveSupport 8.1 仍以位置参数调用
   `JSON.parse(source, options)`,而 json 3.x 不再接受第二个位置参数。不加这个
   约束,任何携带加密 session cookie 的请求(也就是浏览器里每一次表单提交)

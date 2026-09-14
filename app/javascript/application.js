@@ -1,9 +1,16 @@
 // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
 //
-// Turbo is deliberately not imported: Turbo Drive would highjack the same link
-// clicks and form submissions that htmx is here to handle. htmx itself is loaded
-// as a classic script from vendor/javascript in app/views/layouts/application.html.erb.
-import "controllers"
+// htmx is pulled in here, through the import map, so the layout needs no separate
+// script tag and there is no load-order to reason about. The ESM build exports
+// the htmx object and initialises itself; assigning it to window keeps `htmx`
+// reachable from hx-on expressions, extensions and the browser console.
+//
+// No Turbo and no Stimulus, on purpose: Turbo Drive would highjack the same link
+// clicks and form submissions that htmx handles, and Stimulus would only be a
+// second, unused way of attaching behaviour to the same DOM.
+import htmx from "htmx"
+
+window.htmx = htmx
 
 // htmx leaves 4xx responses alone by default, which would drop the
 // re-rendered form that Rails returns with a 422. Swap it, but leave the
